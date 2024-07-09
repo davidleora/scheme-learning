@@ -7,19 +7,48 @@
 ; Ext 1
 (define (get-depth tree depth)
   (cond
-    ((null? tree) '())  ; Handle an empty tree
-    ((= depth 0)        ; We're at the target depth
-     (if (pair? tree)   ; If tree is a pair (i.e., non-leaf node)
-         (if (list? (car tree))  ; If car is a list, skip it at depth 1
-             '()
-             (list (car tree)))  ; Collect non-list car elements
+    ((null? tree) '()) 
+    ((= depth 0) 
+     (if (pair? tree) 
+         (if (list? (car tree))
+            '()
+            (list (car tree)))
          '()))
-    ((list? tree)       ; If tree is a list and not at depth 1
-     (apply append (map (lambda (sub-tree)  ; Apply to each subtree
-                          (get-depth sub-tree (- depth 1)))
+    ((list? tree)
+     (apply append (map (lambda (sub-tree) (get-depth sub-tree (- depth 1)))
                         tree)))
-    (else '())))  ; Return an empty list in other cases
+    (else '())))
 
+; Ext 2
+(define (search tree name depth)
+    (cond
+      ((null? tree) 0)
+      ((equal? tree name) (- depth 1))
+      ((list? tree)
+       (let ((result (map (lambda (sub-tree) (search sub-tree name (+ depth 1)))
+                    tree)))
+         (let loop ((lst result))
+           (cond
+             ((null? lst) 0)
+             ((not (equal? 0 (car lst))) (car lst))
+             (else (loop (cdr lst)))))))
+      (else 0)))
+       
+(define (get-cousin tree name)
+  (let ((depth (search tree name 0)))
+    (define (get-cousin-helper tree current-depth)
+      (cond
+        ((null? tree) '())
+        ((= current-depth depth)
+         (if (pair? tree)
+            (if (list? (car tree))
+               '()
+               (list (car tree)))
+            '()))
+        ((list? tree)
+         (apply append (map (lambda (sub-tree) (get-cousin-helper sub-tree (+ current-depth 1)))
+                           tree)))
+        (else '())))
+    (get-cousin-helper tree 0)))
 
-
-
+; Ext 3

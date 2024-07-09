@@ -52,3 +52,17 @@
     (get-cousin-helper tree 0)))
 
 ; Ext 3
+(define (get-path tree name)
+  (define (helper tree path)
+    (cond
+      ((null? tree) #f)
+      ((equal? tree name) (reverse path))
+      ((list? tree)
+       (let ((results (map (lambda (sub-tree) (helper sub-tree (cons (car tree) path))) tree)))
+         (let loop ((lst results))
+           (cond
+             ((null? lst) #f)
+             ((not (equal? #f (car lst))) (car lst))
+             (else (loop (cdr lst)))))))
+      (else #f)))
+  (helper tree '()))

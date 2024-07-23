@@ -78,20 +78,65 @@ Redundancy Example
 (define simple-
   (lambda (lst)
     ;; TODO: Implement subtraction simplification logic
-    (let ((non-zero-list (cdr lst)))
+    (let ((operator (car lst))
+          (first (cadr lst))
+          (non-zero-list (remove-zeros (cddr lst))))
       (cond
-        ((null? non-zero-list) (car lst))
-        (else (cons '- non-zero-list))))
-    ))
+        ;; Case 1: If non-zero-list is empty, return first
+        ((null? non-zero-list) first)
+        
+        ;; Case 2: If non-zero-list is not empty
+        (else (cons operator (cons first non-zero-list))))))
+    )
 
-#|
 (define simple*
   (lambda (lst)
     ;; TODO: Implement multiplication simplification logic
-    ))
+    (let ((p (cadr lst))
+          (q (caddr lst)))
+      (cond
+        ((or (equal? p 0) (equal? q 0)) 0)
+        ((equal? p 1) q)
+        ((equal? q 1) p)
+        (else (cons '* (list p q)))
+        )))
+  )
 
 (define simple**
   (lambda (lst)
-    ;; TODO: Implement exponentiation simplification logic
+    ;; TODO: Implement power simplification logic
+    (let ((p (cadr lst))
+          (q (caddr lst)))
+      (cond
+        ;; Case 1: If q is 0, return 1
+        ((equal? q 0) 1)
+        
+        ;; Case 2: If q is 1, return p
+        ((equal? q 1) p)
+        
+        ;; Case 3: Otherwise, return the original list with ** at the front
+        (else (cons '** (list p q)))
+        )))
+    )
+
+(define (simple expr)
+  (cond
+    ;; Case 1: If expr is a constant or variable, return it as is
+    ((or (number? expr) (symbol? expr)) expr)
+    
+    ;; Case 2: Depending on the operator, apply the corresponding simple function
+    ((and (list? expr) (eqv? (car expr) '+))
+     (simple+ (cons '+ (map simple (cdr expr)))))
+    
+    ((and (list? expr) (eqv? (car expr) '-))
+     (simple- (cons '- (map simple (cdr expr)))))
+    
+    ((and (list? expr) (eqv? (car expr) '*))
+     (simple* (cons '* (map simple (cdr expr)))))
+    
+    ((and (list? expr) (eqv? (car expr) '**))
+     (simple** (cons '** (map simple (cdr expr)))))
+    
+    ;; Default case: return the expression as is
+    (else expr)
     ))
-|#
